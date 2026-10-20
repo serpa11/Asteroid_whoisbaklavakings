@@ -23,7 +23,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
 
-      - name: build
+      - name: build Asteroid
         run: |
           set -euo pipefail
           xcodebuild \
@@ -45,6 +45,30 @@ jobs:
           ditto -c -k --keepParent Payload Asteroid.ipa
           rm -rf Payload
 
+      - name: build ShineMobile web wrapper
+        working-directory: ios/ShineMobile
+        run: |
+          set -euo pipefail
+          rm -rf DerivedData Payload ShineMobile.ipa
+          xcodebuild \
+            -project ShineMobile.xcodeproj \
+            -target ShineMobile \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath DerivedData \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=NO \
+            build
+
+          APP_PATH="$(find DerivedData/Build/Products/Release-iphoneos -maxdepth 1 -type d -name 'ShineMobile.app' -print -quit)"
+          test -n "$APP_PATH"
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          ditto -c -k --keepParent Payload ShineMobile.ipa
+          rm -rf Payload
+
       - name: release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -57,7 +81,7 @@ jobs:
 
           NOTES="$(git log -5 --pretty=format:'- %h %s')"
 
-          gh release create development Asteroid.ipa \
+          gh release create development Asteroid.ipa ios/ShineMobile/ShineMobile.ipa \
             --target "${GITHUB_SHA}" \
             --title "Development" \
             --prerelease \
