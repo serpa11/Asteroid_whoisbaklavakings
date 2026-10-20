@@ -23,6 +23,21 @@ struct ContentView: View {
                 VStack {
                     Spacer()
                     HStack {
+                        Spacer()
+                        Button {
+                            showSettings = true
+                        } label: {
+                            Image(systemName: "gearshape")
+                        }
+                        .buttonStyle(GlassCircleButtonStyle())
+                        .padding(.trailing, 24)
+                        .padding(.top, 24)
+                    }
+                }
+
+                VStack {
+                    Spacer()
+                    HStack {
                         Button {
                             // Search is a placeholder in the reference UI.
                         } label: {
