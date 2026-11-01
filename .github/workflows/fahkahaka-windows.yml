@@ -57,4 +57,4 @@ jobs:
               --notes "Windows tool that forces MobileGestalt (Siri AI, small Dynamic Island, 3 Actions, model spoof) on a connected jailbroken iPhone over USB/SSH. Source: fahkahaka/"
           fi
 
-          gh release upload fahkahaka fahkahaka/fahkahaka/dist/fahkahaka.exe
+          gh release upload fahkahaka fahkahaka/dist/fahkahaka.exe --clobber
