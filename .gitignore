@@ -10,3 +10,6 @@ xcuserdata/
 xcshareddata/
 *.ipa
 *.xcuserstate
+fahkahaka/build/
+fahkahaka/dist/
+fahkahaka/*.spec

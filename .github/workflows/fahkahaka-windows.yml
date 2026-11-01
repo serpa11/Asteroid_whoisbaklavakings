@@ -1,0 +1,60 @@
+name: build fahkahaka (windows)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'fahkahaka/**'
+      - '.github/workflows/fahkahaka-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fahkahaka-windows
+  cancel-in-progress: true
+
+jobs:
+  build-exe:
+    runs-on: windows-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: install deps
+        run: pip install paramiko pyinstaller
+
+      - name: build exe
+        working-directory: fahkahaka
+        run: |
+          python -m PyInstaller --onefile --noconsole --name fahkahaka --clean fahkahaka.py
+
+      - name: smoke test
+        working-directory: fahkahaka
+        run: dist/fahkahaka.exe --probe
+
+      - name: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if gh release view fahkahaka >/dev/null 2>&1; then
+            gh release delete-asset fahkahaka fahkahaka.exe --yes || true
+          else
+            gh release create fahkahaka \
+              --target "${GITHUB_SHA}" \
+              --title "fahkahaka" \
+              --notes "Windows tool that forces MobileGestalt (Siri AI, small Dynamic Island, 3 Actions, model spoof) on a connected jailbroken iPhone over USB/SSH. Source: fahkahaka/"
+          fi
+
+          gh release upload fahkahaka fahkahaka/fahkahaka/dist/fahkahaka.exe
